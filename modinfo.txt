@@ -1,0 +1,9 @@
+	Name: Better AI Ships
+	Compatibility: 200
+	Description: <<
+		My attempt at improving AI ship design
+
+		NOT TESTED/READY AT ALL
+
+		PROBABLY won't break your games if you decide to use it
+	>>
