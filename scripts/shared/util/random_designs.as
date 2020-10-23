@@ -143,8 +143,8 @@ tidy class Designer {
 
 		//Weapons for flagships
 		if(weapons) {
-			composition.insertLast(Weapon(tag("Weapon") & tag("MainDPS"), 0.15, 0.25));
-			composition.insertLast(Weapon(tag("Weapon") & tag("MainDPS"), 0.15, 0.25));
+			composition.insertLast(Weapon(tag("Weapon") & tag("MainDPS"), 0.15, 0.35));
+			composition.insertLast(Weapon(tag("Weapon") & tag("MainDPS"), 0.15, 0.35));
 			composition.insertLast(Chance(0.25, Weapon(tag("Weapon") & tag("SecondaryDPS"), 0.075, 0.15)));
 		}
 
@@ -154,14 +154,14 @@ tidy class Designer {
 		//Control core
 		if(owner.hasTrait(getTraitID("Ancient"))) {
 			composition.insertLast(Internal(subsystem("AncientCore"), 0.025, 0.05));
-			composition.insertLast(Chance(0.5, Internal(subsystem("AncientCore"), 0.025, 0.05)));
+			composition.insertLast(Internal(subsystem("AncientCore"), 0.025, 0.05));
 
 			if(power)
 				composition.insertLast(Chance(0.2, Internal(tag("IsReactor"), 0.01, 0.03)));
 		}
 		else {
 			composition.insertLast(Internal(tag("ControlCore"), 0.025, 0.05));
-			composition.insertLast(Chance(0.5, Internal(tag("ControlCore"), 0.025, 0.05)));
+			composition.insertLast(Internal(tag("ControlCore"), 0.025, 0.05));
 
 			if(power)
 				composition.insertLast(Internal(tag("IsReactor"), 0.04, 0.06));
@@ -185,6 +185,7 @@ tidy class Designer {
 
 		//Armor
 		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft | HM_Down | HM_Up, 1, 1));
+		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft, 1, 1)); // at least 2 layers on the front
 		for(int i = 0; i < 1 + size / 400 && i < 4; ++i)
 			composition.insertLast(Chance(0.33, ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft, 1, 1)));
 	}
@@ -219,6 +220,7 @@ tidy class Designer {
 		composition.insertLast(Filler(subsystem("SupplyModule"), 0.09, 0.13));
 
 		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_ALL, 1, 1));
+		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_ALL, 1, 1)); //stations should be difficult to destroy?
 		for(int i = 0; i < 1 + size / 400 && i < 4; ++i)
 			composition.insertLast(Chance(0.33, ArmorLayer(tag("PrimaryArmor"), HM_ALL, 1, 1)));
 	}
@@ -256,16 +258,17 @@ tidy class Designer {
 
 	void composeScout() {
 		composition.length = 0;
-
-		composition.insertLast(Exhaust(tag("Engine") & tag("GivesThrust"), 0.80, 0.80));
-		composition.insertLast(Internal(tag("ControlCore"), 0.05, 0.05));
-		composition.insertLast(Internal(tag("Hyperengine"), 0.50, 0.50));
+		
+		composition.insertLast(Internal(tag("ControlCore"), 0.01, 0.01));
+		composition.insertLast(Exhaust(tag("Engine") & tag("GivesThrust"), 1, 1));
+		composition.insertLast(Exhaust(tag("Engine") & tag("GivesThrust"), 1, 1));
+		composition.insertLast(Internal(tag("Hyperengine"), 0.30, 0.30));
 
 		//Shrine if needed
 		if(owner.hasTrait(getTraitID("Devout")))
 			composition.insertLast(Internal(tag("Prayer"), 0.15, 0.20));
 
-		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft | HM_Down | HM_Up, 1, 1));
+		// You were expecting armor to be added but...
 	}
 
 	Tag@ tag(const string& value) {
@@ -579,7 +582,10 @@ tidy class Designer {
 		}
 		composition.length = compLength;
 
-		//Fill as of yet unmarked hexes with armor
+
+
+
+		//Fill as of yet unmarked hexes with armor (except it also fills everything else appearently)
 		{
 			auto@ armor = addSubsystem(primaryArmor.choose());
 			for(uint i = 0, cnt = markedHexes.length; i < cnt; ++i) {
@@ -599,7 +605,7 @@ tidy class Designer {
 
 					double w = 1.0;
 					if(subsys.def.hasTag(ST_BadFiller))
-						w /= 4.0;
+						w /= 8.0;
 					if(subsys.def.hasTag(ST_PrimaryArmor))
 						w /= 10.0;
 					if(subsys.fillerCount != 0)
@@ -614,8 +620,11 @@ tidy class Designer {
 					addHex(extendTo, pos);
 					extendTo.fillerCount += 1;
 				}
+				/*
+				// this is where armor is placed
 				else
 					addHex(armor, pos);
+				*/
 			}
 		}
 
@@ -1422,10 +1431,13 @@ tidy class Weapon : Distributor {
 
 		subsys.rotation = dsg.getFreeRotation(subsys.core, prioritize=!allDirections);
 
+		/*
 		if(limitArc)
 			dsg.clearDirections(subsys.core, HM_ALL);
 		else
 			dsg.clearDirections(subsys.core, dsg.mask(subsys.rotation));
+		*/
+		dsg.clearDirections(subsys.core, dsg.mask(subsys.rotation));
 
 		//Spread the subsystem
 		dsg.addHex(subsys, subsys.core, subsys.def.coreModule);

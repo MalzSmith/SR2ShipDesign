@@ -318,11 +318,11 @@ final class AIBehavior {
 
 		//Low difficulties are worse at designing
 		if(diff <= 0)
-			designEvaluateCount = 3;
+			designEvaluateCount = 5;
 		else if(diff <= 1)
-			designEvaluateCount = 8;
+			designEvaluateCount = 16;
 		else
-			designEvaluateCount = 12;
+			designEvaluateCount = 32;
 
 		//Easy is a bit slow
 		if(diff <= 0)

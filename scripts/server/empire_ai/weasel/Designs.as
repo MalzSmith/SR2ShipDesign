@@ -157,6 +157,7 @@ tidy final class DesignTarget {
 	}
 
 	double evaluate(AI& ai, const Design& dsg) {
+
 		double w = 1.0;
 
 		//Try to stick as close to our target as we can
@@ -203,31 +204,42 @@ tidy final class DesignTarget {
 			if(purpose == DP_Support)
 				targetAccel *= 1.5;
 			else if(purpose == DP_Scout)
-				targetAccel *= 3.0;
+				targetAccel *= 8.0;
 
 			w *= weight(dsg.total(SV_Thrust) / max(dsg.total(HV_Mass), 0.01), targetAccel);
 		}
 
-		//Penalties for having important systems easy to shoot down
-		uint holes = 0;
-		for(uint i = 0, cnt = dsg.subsystemCount; i < cnt; ++i) {
-			auto@ sys = dsg.subsystem(i);
-			if(!sys.type.hasTag(ST_Important))
-				continue;
-			//TODO: We should be able to penalize for exposed supply storage
-			if(sys.type.hasTag(ST_NoCore))
-				continue;
+		//Penalties for having important systems easy to shoot down (except for scouts)
+		if (purpose != DP_Scout) {
+			uint holes = 0;
+			for(uint i = 0, cnt = dsg.subsystemCount; i < cnt; ++i) {
+				auto@ sys = dsg.subsystem(i);
+				if(!sys.type.hasTag(ST_Important))
+					continue;
+				//TODO: We should be able to penalize for exposed supply storage
+				if(sys.type.hasTag(ST_NoCore))
+					continue;
 
-			vec2u core = sys.core;
-			for(uint d = 0; d < 6; ++d) {
-				if(!traceContainsArmor(dsg, core, d))
-					holes += 1;
+				vec2u core = sys.core;
+				for(uint d = 0; d < 6; ++d) {
+					if(!traceContainsArmor(dsg, core, d))
+						{
+							if (sys.type.hasTag(ST_ControlCore))
+							{
+								holes += 2;
+							} else
+							{
+								holes += 1;
+							}
+						}
+
+				}
 			}
-		}
 		
-		if(holes != 0)
-			w /= pow(0.9, double(holes));
-
+		
+			if(holes != 0)
+				w /= double(holes); // protect your important systems!
+		}
 		//TODO: Check FTL
 
 		return w;
