@@ -197,7 +197,7 @@ final class AIBehavior {
 	//How much flagship size we try to make per available labor
 	double shipSizePerLabor = 1.0 / 0.33;
 	//How much maintenance we expect per ship size
-	double maintenancePerShipSize = 2.0;
+	double maintenancePerShipSize = 2.2;
 	//Minimum percentage increase in size before we decide to retrofit a flagship to be bigger
 	double shipRetrofitThreshold = 0.5;
 	//Whether to retrofit our free starting fleet if appropriate

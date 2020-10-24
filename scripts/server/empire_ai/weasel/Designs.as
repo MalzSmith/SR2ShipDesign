@@ -204,7 +204,7 @@ tidy final class DesignTarget {
 			if(purpose == DP_Support)
 				targetAccel *= 1.5;
 			else if(purpose == DP_Scout)
-				targetAccel *= 8.0;
+				targetAccel *= 10.0;
 
 			w *= weight(dsg.total(SV_Thrust) / max(dsg.total(HV_Mass), 0.01), targetAccel);
 		}
@@ -227,20 +227,20 @@ tidy final class DesignTarget {
 					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_Down))
 						holes += 2;
 					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_DownRight))
-						holes += 4;
+						holes += 8;
 					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_UpRight))
-						holes += 4;
+						holes += 8;
 					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_Up))
 						holes += 2;
 					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_UpLeft))
 						holes += 1;
 				} else {
 					for(uint d = 0; d < 6; ++d) {
-					if(!traceContainsArmor(dsg, core, d))
-						{
-							holes += 1;
+						if(!traceContainsArmor(dsg, core, d))
+							{
+								holes += 1;
+							}
 						}
-					}
 				}
 			}
 		
