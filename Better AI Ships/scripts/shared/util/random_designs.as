@@ -596,16 +596,20 @@ tidy class Designer {
 
 
 
-		// Checks hexes around marked hexes and decides what subsystem should be extended to the hex
+		// Fill marked hexes with subsystems picked from systems around the hex
 		{
-			auto@ armor = addSubsystem(primaryArmor.choose());
-			for(uint i = 0, cnt = markedHexes.length; i < cnt; ++i) {
+			// Filling with armor randomly is suboptimal and especially bad on scouts
+			// auto@ armor = addSubsystem(primaryArmor.choose());
+
+			while (markedHexes.length != 0) {
 				vec2u pos = markedHexes[0];
 
 				SubsystemData@ extendTo;
 				double checks = 0.0;
 				for(uint d = 0; d < 6; ++d) {
 					vec2u otherPos = pos;
+
+					// If no neighbour in direction, skip
 					if(!advanceHexPosition(otherPos, gridSize, HexGridAdjacency(d)))
 						continue;
 
@@ -615,15 +619,18 @@ tidy class Designer {
 						continue;
 
 					double w = 1.0;
+					// The BadFiller tag is kind of self-explanatory
 					if(subsys.def.hasTag(ST_BadFiller))
-						w /= 20.0;
+						w /= 100.0;
+					// Filling with armor should have a lower priority
 					if(subsys.def.hasTag(ST_PrimaryArmor))
-						w /= 5.0;
+						w /= 10.0;
+					// Make subsystems already used for filling less likely to be used again
 					if(subsys.fillerCount != 0)
 						w /= double(subsys.fillerCount);
 
 					checks += w;
-					if(randomd() < w / checks)
+					if(extendTo is null || randomd() < w / checks) // We default to the first valid subsystem found
 						@extendTo = subsys;
 				}
 
@@ -632,9 +639,13 @@ tidy class Designer {
 					extendTo.fillerCount += 1;
 				}
 				else
-					// Leave the hex empty if we didn't manage to fill it
+				{
+					// Add hex to the back of the queue if we didn't manage to fill it
+					// This should probably not result in an infinite loop as hexes usually get marked starting from existing subsystems
 					// addHex(armor, pos);
 					unmarkHex(pos);
+					markHex(pos);
+				}
 			}
 		}
 
