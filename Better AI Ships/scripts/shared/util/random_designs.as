@@ -115,6 +115,7 @@ tidy class Designer {
 		}
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeSupport() {
 		composition.length = 0;
 
@@ -126,6 +127,7 @@ tidy class Designer {
 		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft | HM_Down | HM_Up, 1, 2));
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeSatellite() {
 		composition.length = 0;
 
@@ -137,6 +139,7 @@ tidy class Designer {
 		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_ALL, 1, 2));
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeFlagship(bool haveSupport = true, bool tryFTL = true, bool supply = true, bool weapons = true, bool power = true, bool clear = true) {
 		if(clear)
 			composition.length = 0;
@@ -190,6 +193,7 @@ tidy class Designer {
 			composition.insertLast(Chance(0.33, ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft, 1, 1)));
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeStation(bool clear = true) {
 		if(clear)
 			composition.length = 0;
@@ -225,6 +229,7 @@ tidy class Designer {
 			composition.insertLast(Chance(0.33, ArmorLayer(tag("PrimaryArmor"), HM_ALL, 1, 1)));
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeGate() {
 		composition.length = 0;
 
@@ -233,6 +238,7 @@ tidy class Designer {
 		composeStation(clear=false);
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeSlipstream() {
 		composition.length = 0;
 		composition.insertLast(Exhaust(tag("Engine") & tag("GivesThrust"), 0.50, 0.50));
@@ -247,6 +253,7 @@ tidy class Designer {
 		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft | HM_Down | HM_Up, 1, 1));
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeMothership() {
 		composition.length = 0;
 		composition.insertLast(Internal(tag("ControlCore"), 0.2, 0.5));
@@ -256,6 +263,7 @@ tidy class Designer {
 		hexLimit = 225;
 	}
 
+	// Adding stuff to a list to describe what a ship of this type should consist of
 	void composeScout() {
 		composition.length = 0;
 		
@@ -902,6 +910,7 @@ tidy class Designer {
 			clearDir(pos, HEX_Up);
 	}
 
+	// Draws traces from the edges of the grid in every direction, checks the first system it hits and adds coating based on that
 	void addCoating(SubsystemData@ subsys, uint directions) {
 		array<vec2u> coated;
 
@@ -920,6 +929,7 @@ tidy class Designer {
 						break;
 					}
 					if(data.subsysId != -1) {
+						// Don't put armor on systems with PassExterior
 						if(!data.subsys(this).def.passExterior)
 							found = true;
 						break;
@@ -928,6 +938,7 @@ tidy class Designer {
 				}
 				while(advanceHexPosition(pos, gridSize, HexGridAdjacency(HEX_DownLeft)));
 
+				// Don't add armor if the hex was previously cleared (ie. around engine cores)
 				if(found && !hex[prevPos].cleared) {
 					addHex(subsys, prevPos);
 					coated.insertLast(prevPos);
@@ -1431,13 +1442,12 @@ tidy class Weapon : Distributor {
 
 		subsys.rotation = dsg.getFreeRotation(subsys.core, prioritize=!allDirections);
 
-		/*
 		if(limitArc)
-			dsg.clearDirections(subsys.core, HM_ALL);
+			// Only clear the direction where the weapon is aimed
+			// dsg.clearDirections(subsys.core, HM_ALL);
+			dsg.clearDirections(subsys.core, dsg.mask(subsys.rotation));
 		else
 			dsg.clearDirections(subsys.core, dsg.mask(subsys.rotation));
-		*/
-		dsg.clearDirections(subsys.core, dsg.mask(subsys.rotation));
 
 		//Spread the subsystem
 		dsg.addHex(subsys, subsys.core, subsys.def.coreModule);
@@ -1450,7 +1460,9 @@ tidy class Weapon : Distributor {
 			auto@ dupe = dsg.dupeMirror(subsys);
 			if(dupe !is null) {
 				if(limitArc)
-					dsg.clearDirections(dupe.core, HM_ALL);
+					// Only clear the direction where the weapon is aimed
+					// dsg.clearDirections(dupe.core, HM_ALL);
+					dsg.clearDirections(dupe.core, dsg.mask(dupe.rotation));
 				else
 					dsg.clearDirections(dupe.core, dsg.mask(dupe.rotation));
 			}
