@@ -221,18 +221,26 @@ tidy final class DesignTarget {
 					continue;
 
 				vec2u core = sys.core;
-				for(uint d = 0; d < 6; ++d) {
+				if (purpose != DP_Gate && purpose != DP_Defense) {
+					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_DownLeft))
+						holes += 1;
+					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_Down))
+						holes += 2;
+					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_DownRight))
+						holes += 4;
+					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_UpRight))
+						holes += 4;
+					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_Up))
+						holes += 2;
+					if(!traceContainsArmor(dsg, core, HexGridAdjacency::HEX_UpLeft))
+						holes += 1;
+				} else {
+					for(uint d = 0; d < 6; ++d) {
 					if(!traceContainsArmor(dsg, core, d))
 						{
-							if (sys.type.hasTag(ST_ControlCore))
-							{
-								holes += 2;
-							} else
-							{
-								holes += 1;
-							}
+							holes += 1;
 						}
-
+					}
 				}
 			}
 		
