@@ -629,11 +629,9 @@ tidy class Designer {
 					addHex(extendTo, pos);
 					extendTo.fillerCount += 1;
 				}
-				/*
 				// this is where armor is placed
 				else
 					addHex(armor, pos);
-				*/
 			}
 		}
 
@@ -1512,7 +1510,9 @@ tidy class Exhaust : Distributor {
 
 		auto@ subsys = dsg.addSubsystem(type);
 		subsys.core = core;
-		dsg.clearDirections(subsys.core, HM_DownLeft | HM_UpLeft);
+		// Only clear it if the core actually has to be exterior
+		if (type.hasTag(ST_ExteriorCore))
+			dsg.clearDirections(subsys.core, HM_DownLeft | HM_UpLeft);
 
 		//Spread the subsystem
 		dsg.addHex(subsys, subsys.core, subsys.def.coreModule);
@@ -1523,7 +1523,8 @@ tidy class Exhaust : Distributor {
 
 		if(mirror) {
 			auto@ dupe = dsg.dupeMirror(subsys);
-			if(dupe !is null)
+			// Clear core if needed
+			if(dupe !is null && type.hasTag(ST_ExteriorCore))
 				dsg.clearDirections(dupe.core, HM_DownLeft | HM_UpLeft);
 		}
 	}
