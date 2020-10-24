@@ -386,6 +386,7 @@ tidy class Designer {
 		return vec2u();
 	}
 
+	// Mark hex to be filled later
 	void markHex(const vec2u& pos) {
 		auto@ data = hex[pos];
 
@@ -405,6 +406,7 @@ tidy class Designer {
 		}
 	}
 
+	// Unmark hex from being filled
 	void unmarkHex(const vec2u& pos) {
 		auto@ data = hex[pos];
 
@@ -594,7 +596,7 @@ tidy class Designer {
 
 
 
-		//Fill as of yet unmarked hexes with armor (except it also fills everything else appearently)
+		// Checks hexes around marked hexes and decides what subsystem should be extended to the hex
 		{
 			auto@ armor = addSubsystem(primaryArmor.choose());
 			for(uint i = 0, cnt = markedHexes.length; i < cnt; ++i) {
@@ -614,9 +616,9 @@ tidy class Designer {
 
 					double w = 1.0;
 					if(subsys.def.hasTag(ST_BadFiller))
-						w /= 8.0;
+						w /= 20.0;
 					if(subsys.def.hasTag(ST_PrimaryArmor))
-						w /= 10.0;
+						w /= 5.0;
 					if(subsys.fillerCount != 0)
 						w /= double(subsys.fillerCount);
 
@@ -629,9 +631,10 @@ tidy class Designer {
 					addHex(extendTo, pos);
 					extendTo.fillerCount += 1;
 				}
-				// this is where armor is placed
 				else
-					addHex(armor, pos);
+					// Leave the hex empty if we didn't manage to fill it
+					// addHex(armor, pos);
+					unmarkHex(pos);
 			}
 		}
 
