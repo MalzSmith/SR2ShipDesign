@@ -187,7 +187,7 @@ tidy class Designer {
 			composition.insertLast(Filler(subsystem("SupportCapModule"), 0.04, 0.14));
 
 		//Armor
-		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft | HM_Down | HM_Up, 1, 1));
+		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_ALL, 1, 1)); // Add some armor from every direction
 		composition.insertLast(ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft, 1, 1)); // at least 2 layers on the front
 		for(int i = 0; i < 1 + size / 400 && i < 4; ++i)
 			composition.insertLast(Chance(0.33, ArmorLayer(tag("PrimaryArmor"), HM_DownLeft | HM_UpLeft, 1, 1)));
@@ -267,8 +267,9 @@ tidy class Designer {
 	void composeScout() {
 		composition.length = 0;
 		
-		composition.insertLast(Internal(tag("ControlCore"), 0.01, 0.01));
+		// Adding an engine first hoping that this results in the control core being less exposed
 		composition.insertLast(Exhaust(tag("Engine") & tag("GivesThrust"), 1, 1));
+		composition.insertLast(Internal(tag("ControlCore"), 0.01, 0.01));
 		composition.insertLast(Exhaust(tag("Engine") & tag("GivesThrust"), 1, 1));
 		composition.insertLast(Internal(tag("Hyperengine"), 0.30, 0.30));
 
