@@ -631,7 +631,7 @@ tidy class Designer {
 					double w = 1.0;
 					// The BadFiller tag is kind of self-explanatory
 					if(subsys.def.hasTag(ST_BadFiller))
-						w /= 100.0;
+						continue
 					// Filling with armor should have a lower priority
 					if(subsys.def.hasTag(ST_PrimaryArmor))
 						w /= 10.0;
