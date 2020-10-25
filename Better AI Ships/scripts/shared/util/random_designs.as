@@ -760,7 +760,7 @@ tidy class Designer {
 		return chosen;
 	}
 
-	// Returns a random empty marked hex that is found by hitting the design with traces from one of the specified directions
+	// Returns a random marked hex that is found by hitting the design with traces traveling in one of the specified directions
 	// This kind of math seems to be often used in the entire code to pick stuff randomly with weights, I don't fully understand it but it seems to be fair
 	vec2u markedFromDirection(uint directions) {
 		vec2u found(uint(-1), uint(-1));
