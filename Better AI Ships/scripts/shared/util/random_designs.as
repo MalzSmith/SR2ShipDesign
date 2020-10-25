@@ -10,12 +10,14 @@ import int getTraitID(const string&) from "traits";
 
 const array<double> DIRWEIGHT = {1.0, 0.2, 1.0, 1.0, 0.2, 1.0};
 
+// Class describing a placed subsystem in the design
 tidy class SubsystemData {
 	int id = 0;
 	int defId = -1;
 	array<vec2u> hexes;
 	int rotation = -1;
 	vec2u core;
+	// How many hexes of this subsystem were placed as part of the filling process (see Designer::_design)
 	int fillerCount = 0;
 
 	void set_def(const SubsystemDef@ def) {
@@ -27,8 +29,11 @@ tidy class SubsystemData {
 	}
 };
 
+// Class describing a hex of the design (including some logic for the generator)
 tidy class HexData {
+	// A hex is marked when it's part of the design but has no subsystem placed on it yet
 	bool marked = false;
+	// A hex is cleared when no subsystem should be placed on it (for example traces starting from weapon cores)
 	bool cleared = false;
 	int freeAdj = 6;
 	int markedAdj = 0;
