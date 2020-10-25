@@ -259,6 +259,7 @@ tidy class Designer {
 		composition.insertLast(Internal(tag("ControlCore"), 0.2, 0.5));
 		composition.insertLast(Internal(tag("ControlCore"), 0.2, 0.5));
 		composition.insertLast(Applied(tag("Mothership")));
+		// Motherships are also flagships so we add those things as well
 		composeFlagship(supply=false, power=false, clear=false);
 		hexLimit = 225;
 	}
@@ -422,14 +423,17 @@ tidy class Designer {
 		}
 	}
 
+	// Mark the base area of the ship
 	void markInterior() {
 		markedHexes.reserve(hexLimit);
+		// Start from the center
 		markHex(center);
 
 		//Interior bubble
 		while(markedHexes.length < uint(hexLimit)) {
 			uint tries = 0;
 
+			// Get a random hex adjacent to the currently marked area
 			vec2u pos = getFreeHex();
 			if(hex[pos].marked)
 				break;
@@ -445,7 +449,7 @@ tidy class Designer {
 			}
 		}
 
-		//Record how many marked hexes adjacent
+		//Record how many marked hexes adjacent to each hex
 		for(uint i = 0, cnt = markedHexes.length; i < cnt; ++i) {
 			vec2u pos = markedHexes[i];
 			for(uint d = 0; d < 6; ++d) {
@@ -462,7 +466,7 @@ tidy class Designer {
 	SubsystemData@ addSubsystem(const SubsystemDef@ def) {
 		if(def is null)
 			return null;
-		if(def.hasTag(ST_NonContiguous)) {
+		if(def.hasTag(ST_NonContiguous)) { // Armor, nanomesh, support, supplies, cloaking mesh, etc.
 			for(uint i = 0, cnt = subsystems.length; i < cnt; ++i) {
 				if(subsystems[i].def is def)
 					return subsystems[i];
@@ -503,6 +507,7 @@ tidy class Designer {
 			composition.insertLast(Internal(subsystem("SupportAmmoStorage"), frequency * 0.1, frequency * 0.25));
 	}
 
+	// Clears the entire design (i think?)
 	void clear() {
 		if(hexes.length != 0) {
 			hexes.length = gridSize.x * gridSize.y;
@@ -679,6 +684,7 @@ tidy class Designer {
 			}
 		}
 
+		// TODO: Hull selection should probably be done before drawing the design
 		if(randomHull && owner.shipset !is null) {
 			string hullTag = hulltag;
 			uint hullCount = 0;
@@ -723,12 +729,14 @@ tidy class Designer {
 		return hullTag;
 	}
 
+	// Returns a random marked hex
 	vec2u markedRandom() {
 		if(markedHexes.length == 0)
 			return vec2u(uint(-1), uint(-1));
 		return markedHexes[randomi(0, markedHexes.length-1)];
 	}
 
+	// Returns a random marked hex with a good chance of it also being internal and close to the center
 	vec2u markedInternal() {
 		double totalWeight = 0;
 		vec2u chosen;
@@ -747,6 +755,8 @@ tidy class Designer {
 		return chosen;
 	}
 
+	// Returns a random empty marked hex that is found by hitting the design with traces from one of the specified directions
+	// This kind of math seems to be often used in the entire code to pick stuff randomly with weights, I don't fully understand it but it seems to be fair
 	vec2u markedFromDirection(uint directions) {
 		vec2u found(uint(-1), uint(-1));
 		double checked = 0.0;
@@ -870,6 +880,8 @@ tidy class Designer {
 		return found;
 	}
 
+	// Marks hexes as "clear" starting from a specific hex in a given direction. This data is used when coating with armor for example
+	// Used to clear paths to external cores
 	void clearDir(const vec2u& pos, uint dir) {
 		vec2u clearPos = pos;
 		bool shouldClear = true;
@@ -1436,13 +1448,16 @@ tidy class Weapon : Distributor {
 		int hexes = pct * double(dsg.hexLimit);
 		bool limitArc = type.hasTag(ST_HexLimitArc);
 
+		// Picks a hex on the edge of the ship to mark the core
+		// TODO: Force missile type weapons to not be forward-facing
 		vec2u core;
+		// If can fire in any direction, pick randomly
 		if(allDirections)
 			core = dsg.markedFromDirection(HM_ALL);
-		else if(!limitArc || randomd() < 0.3)
+		else if(!limitArc || randomd() < 0.1)	// Vanilla chance was .3, i don't like limited fire arc weapons facing backwards
 			core = dsg.markedFromDirection(HM_DownLeft | HM_UpLeft | HM_Down | HM_Up);
 		else
-			core = dsg.markedFromDirection(HM_DownLeft | HM_UpLeft);
+			core = dsg.markedFromDirection(HM_DownLeft | HM_UpLeft); // Pick a hex that's open from the front
 
 		if(!dsg.valid(core))
 			return;
@@ -1544,6 +1559,7 @@ tidy class Exhaust : Distributor {
 	}
 };
 
+// Any subsystem that doesn't have to be placed in a specific way. This doesn't meant that the system will actually be internal in the design
 tidy class Internal : Distributor {
 	Filter@ filter;
 	const SubsystemDef@ def;
@@ -1586,6 +1602,7 @@ tidy class Internal : Distributor {
 	}
 };
 
+// This is used for motherships, not sure about the logic here, lazy to check what a Filter is rn
 tidy class Applied : Distributor {
 	Filter@ filter;
 	const SubsystemDef@ def;
@@ -1608,6 +1625,7 @@ tidy class Applied : Distributor {
 	}
 };
 
+// Not sure how to call this, only used for gates in vanilla
 tidy class HorizSpan : Distributor {
 	Filter@ filter;
 	const SubsystemDef@ def;
