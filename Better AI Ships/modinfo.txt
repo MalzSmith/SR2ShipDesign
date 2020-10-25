@@ -1,9 +1,7 @@
 	Name: Better AI Ships
 	Compatibility: 200
 	Description: <<
-		My attempt at improving AI ship design
+		My attempt at improving AI ship design (and the random ship generator slightly)
 
-		NOT TESTED/READY AT ALL
-
-		PROBABLY won't break your games if you decide to use it
+		PROBABLY won't break your games if you decide to use it, it's in very early stage
 	>>
