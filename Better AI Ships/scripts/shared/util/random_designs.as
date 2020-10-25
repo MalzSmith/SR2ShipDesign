@@ -1454,13 +1454,12 @@ tidy class Weapon : Distributor {
 		bool limitArc = type.hasTag(ST_HexLimitArc);
 
 		// Picks a hex on the edge of the ship to mark the core
-		// TODO: Force missile type weapons to not be forward-facing
 		vec2u core;
 		// If can fire in any direction, pick randomly
 		if(allDirections)
 			core = dsg.markedFromDirection(HM_ALL);
 		else if(!limitArc || randomd() < 0.1)	// Vanilla chance was .3, i don't like limited fire arc weapons facing backwards
-			core = dsg.markedFromDirection(HM_DownLeft | HM_UpLeft | HM_Down | HM_Up);
+			core = dsg.markedFromDirection(HM_DownRight | HM_UpRight | HM_Down | HM_Up);
 		else
 			core = dsg.markedFromDirection(HM_DownLeft | HM_UpLeft); // Pick a hex that's open from the front
 
