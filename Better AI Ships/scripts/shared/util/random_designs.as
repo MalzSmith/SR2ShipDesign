@@ -631,7 +631,7 @@ tidy class Designer {
 					double w = 1.0;
 					// The BadFiller tag is kind of self-explanatory
 					if(subsys.def.hasTag(ST_BadFiller))
-						continue
+						w /= 100;
 					// Filling with armor should have a lower priority
 					if(subsys.def.hasTag(ST_PrimaryArmor))
 						w /= 10.0;
@@ -1244,52 +1244,27 @@ tidy class Designer {
 		return true;
 	}
 
+	// Vanilla function returned a random valid rotation if prioritize was true, i have altered it so false value means prioritizing backwards facing cores
 	int getFreeRotation(const vec2u& pos, bool prioritize = true) {
 		int dir = -1;
 		double count = 0;
 
-		if(isFree(pos, HEX_UpRight)) {
-			count += 1.0;
-			if(randomd() < 1.0 / count)
-				dir = HEX_UpRight;
+		array<HexGridAdjacency> checkOrder = {HEX_UpRight, HEX_DownRight, HEX_Up, HEX_Down, HEX_UpLeft, HEX_DownLeft};
+
+		if (!prioritize) {
+			checkOrder.reverse();
 		}
 
-		if(isFree(pos, HEX_DownRight)) {
-			count += 1.0;
-			if(randomd() < 1.0 / count)
-				dir = HEX_DownRight;
+		for (uint i = 0, cnt = checkOrder.length; i < cnt; ++i) {
+			if(isFree(pos, checkOrder[i])) {
+				count += 1.0;
+				if(randomd() < 1.0 / count)
+					dir = checkOrder[i];
+			}
+			if (i % 2 == 0 && dir != -1) {
+				return dir;
+			}
 		}
-
-		if(prioritize && dir != -1)
-			return dir;
-
-		if(isFree(pos, HEX_Up)) {
-			count += 1.0;
-			if(randomd() < 1.0 / count)
-				dir = HEX_Up;
-		}
-
-		if(isFree(pos, HEX_Down)) {
-			count += 1.0;
-			if(randomd() < 1.0 / count)
-				dir = HEX_Down;
-		}
-
-		if(prioritize && dir != -1)
-			return dir;
-
-		if(isFree(pos, HEX_UpLeft)) {
-			count += 1.0;
-			if(randomd() < 1.0 / count)
-				dir = HEX_UpLeft;
-		}
-
-		if(isFree(pos, HEX_DownLeft)) {
-			count += 1.0;
-			if(randomd() < 1.0 / count)
-				dir = HEX_DownLeft;
-		}
-
 		return dir;
 	}
 };
@@ -1453,7 +1428,7 @@ tidy class Weapon : Distributor {
 		int hexes = pct * double(dsg.hexLimit);
 		bool limitArc = type.hasTag(ST_HexLimitArc);
 
-		// Picks a hex on the edge of the ship to mark the core
+		// Pick a hex on the edge of the ship to mark the core
 		vec2u core;
 		// If can fire in any direction, pick randomly
 		if(allDirections)
@@ -1472,7 +1447,9 @@ tidy class Weapon : Distributor {
 		if(!dsg.valid(subsys.core))
 			return;
 
-		subsys.rotation = dsg.getFreeRotation(subsys.core, prioritize=!allDirections);
+		// My change here results in weapons with "allDirection=true" being more likely to face forwards, this is a change to vanilla behavior, probably not significant
+		// Original code fragment had "prioritize=!allDirection"
+		subsys.rotation = dsg.getFreeRotation(subsys.core, prioritize=limitArc);
 
 		if(limitArc)
 			// Only clear the direction where the weapon is aimed
