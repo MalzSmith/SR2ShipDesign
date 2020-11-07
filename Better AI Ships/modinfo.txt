@@ -1,7 +1,15 @@
 	Name: Better AI Ships
 	Compatibility: 200
 	Description: <<
-		My attempt at improving AI ship design (and the random ship generator slightly)
+	My attempt at improving AI ship design
 
-		PROBABLY won't break your games if you decide to use it, it's in very early stage
+	Features:
+		More armor on randomly generated designs
+		No armor on AI generated scouts
+		More control cores on randomly generated flagships
+		No backwards facing lazers/muons/etc
+		AI generates more random designs when picking one to use
+		AI takes important exposed systems more seriously when evaluating ship designs
+
+	Source: https://github.com/MalzSmith/SR2ShipDesign
 	>>
